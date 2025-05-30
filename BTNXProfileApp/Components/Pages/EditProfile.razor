@@ -1,0 +1,90 @@
+@page "/edit-profile/{Id:int}"
+@using BTNXProfileApp.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="container mt-4">
+    <h2>Edit Profile</h2>
+    @if (person != null)
+    {
+        <EditForm Model="@person" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group mb-3">
+                <label for="firstName">First Name:</label>
+                <InputText id="firstName" @bind-Value="person.FirstName" class="form-control" />
+                <ValidationMessage For="@(() => person.FirstName)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="lastName">Last Name:</label>
+                <InputText id="lastName" @bind-Value="person.LastName" class="form-control" />
+                <ValidationMessage For="@(() => person.LastName)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="email">Email:</label>
+                <InputText id="email" @bind-Value="person.Email" class="form-control" />
+                <ValidationMessage For="@(() => person.Email)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="phoneNumber">Phone Number:</label>
+                <InputText id="phoneNumber" @bind-Value="person.PhoneNumber" class="form-control" />
+                <ValidationMessage For="@(() => person.PhoneNumber)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+            <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+        </EditForm>
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Person? person;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            person = await Http.GetFromJsonAsync<Person>($"api/person/{Id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading profile: {ex.Message}");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (person != null)
+        {
+            try
+            {
+                var response = await Http.PutAsJsonAsync($"api/person/{Id}", person);
+                if (response.IsSuccessStatusCode)
+                {
+                    NavigationManager.NavigateTo("/");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating profile: {ex.Message}");
+            }
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+} 

@@ -1,0 +1,78 @@
+@page "/update-profile/{Id:int}"
+@using BTNXProfileApp.Models
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Update Profile</h3>
+
+@if (person == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@person" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <InputText id="firstName" @bind-Value="person.FirstName" class="form-control" />
+            <ValidationMessage For="@(() => person.FirstName)" />
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <InputText id="lastName" @bind-Value="person.LastName" class="form-control" />
+            <ValidationMessage For="@(() => person.LastName)" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <InputText id="email" @bind-Value="person.Email" class="form-control" />
+            <ValidationMessage For="@(() => person.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label for="phoneNumber">Phone Number:</label>
+            <InputText id="phoneNumber" @bind-Value="person.PhoneNumber" class="form-control" />
+            <ValidationMessage For="@(() => person.PhoneNumber)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Profile</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Person? person;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            person = await Http.GetFromJsonAsync<Person>($"api/person/{Id}");
+        }
+        catch (Exception ex)
+        {
+            // Handle error appropriately
+            Console.WriteLine($"Error loading profile: {ex.Message}");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await Http.PutAsJsonAsync($"api/person/{Id}", person);
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            // Handle error appropriately
+            Console.WriteLine($"Error updating profile: {ex.Message}");
+        }
+    }
+} 

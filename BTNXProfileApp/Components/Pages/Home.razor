@@ -1,0 +1,86 @@
+﻿@page "/"
+@using BTNXProfileApp.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Profile Management</h2>
+        <button class="btn btn-primary" @onclick="NavigateToCreate">Create New Profile</button>
+    </div>
+
+    @if (people == null)
+    {
+        <p>Loading...</p>
+    }
+    else if (!people.Any())
+    {
+        <div class="alert alert-info">
+            No profiles found. Click the button above to create a new profile.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var person in people)
+                    {
+                        <tr>
+                            <td>@person.Id</td>
+                            <td>@person.FirstName</td>
+                            <td>@person.LastName</td>
+                            <td>@person.Email</td>
+                            <td>@person.PhoneNumber</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" @onclick="() => NavigateToEdit(person.Id)">Edit</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Person>? people;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPeople();
+    }
+
+    private async Task LoadPeople()
+    {
+        try
+        {
+            people = await Http.GetFromJsonAsync<List<Person>>("api/person");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading profiles: {ex.Message}");
+        }
+    }
+
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/create-profile");
+    }
+
+    private void NavigateToEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/edit-profile/{id}");
+    }
+}

@@ -1,0 +1,71 @@
+@page "/"
+@using BTNXProfileApp.Models
+@inject HttpClient Http
+
+<PageTitle>Home</PageTitle>
+
+<h1>Welcome to BTNX Profile App</h1>
+
+<div class="row mb-3">
+    <div class="col">
+        <a href="create-profile" class="btn btn-primary">Create New Profile</a>
+    </div>
+</div>
+
+@if (people == null)
+{
+    <p>Loading...</p>
+}
+else if (!people.Any())
+{
+    <p>No profiles found. Create your first profile!</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var person in people)
+                {
+                    <tr>
+                        <td>@person.Id</td>
+                        <td>@person.FirstName</td>
+                        <td>@person.LastName</td>
+                        <td>@person.Email</td>
+                        <td>@person.PhoneNumber</td>
+                        <td>
+                            <a href="update-profile/@person.Id" class="btn btn-sm btn-primary">Update</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Person>? people;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            people = await Http.GetFromJsonAsync<List<Person>>("api/person");
+        }
+        catch (Exception ex)
+        {
+            // Handle error appropriately
+            Console.WriteLine($"Error loading profiles: {ex.Message}");
+        }
+    }
+} 

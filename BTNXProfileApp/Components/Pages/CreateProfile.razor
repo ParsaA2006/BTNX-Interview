@@ -1,0 +1,78 @@
+@page "/create-profile"
+@using BTNXProfileApp.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="container mt-4">
+    <h2>Create New Profile</h2>
+    <EditForm Model="@person" OnValidSubmit="HandleValidSubmit" FormName="CreateProfileForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group mb-3">
+            <label for="firstName">First Name:</label>
+            <InputText id="firstName" @bind-Value="person.FirstName" class="form-control" />
+            <ValidationMessage For="@(() => person.FirstName)" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="lastName">Last Name:</label>
+            <InputText id="lastName" @bind-Value="person.LastName" class="form-control" />
+            <ValidationMessage For="@(() => person.LastName)" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="email">Email:</label>
+            <InputText id="email" @bind-Value="person.Email" class="form-control" />
+            <ValidationMessage For="@(() => person.Email)" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="phoneNumber">Phone Number:</label>
+            <InputText id="phoneNumber" @bind-Value="person.PhoneNumber" class="form-control" />
+            <ValidationMessage For="@(() => person.PhoneNumber)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Profile</button>
+        <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Back to List</button>
+    </EditForm>
+</div>
+
+@code {
+    private Person person = new();
+
+    private async Task HandleValidSubmit()
+    {
+        // Explicitly trigger a state change to ensure model is updated
+        StateHasChanged();
+
+        try
+        {
+            // You can add a breakpoint here to inspect the 'person' object before posting
+            Console.WriteLine($"Submitting: {person.FirstName} {person.LastName}");
+
+            var response = await Http.PostAsJsonAsync("api/person", person);
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                 // Handle API error responses, maybe display them to the user
+                 var errorContent = await response.Content.ReadAsStringAsync();
+                 Console.WriteLine($"API Error: {response.StatusCode} - {errorContent}");
+                 // You might want to parse errorContent if your API returns validation errors in a specific format
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating profile: {ex.Message}");
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+} 

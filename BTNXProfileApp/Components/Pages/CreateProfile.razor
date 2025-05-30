@@ -1,36 +1,38 @@
 @page "/create-profile"
 @using BTNXProfileApp.Models
 @using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Linq.Expressions
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
 <div class="container mt-4">
     <h2>Create New Profile</h2>
-    <EditForm Model="@person" OnValidSubmit="HandleValidSubmit" FormName="CreateProfileForm">
+    <EditForm EditContext="@editContext" OnValidSubmit="HandleValidSubmit" FormName="CreateProfileForm">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
         <div class="form-group mb-3">
             <label for="firstName">First Name:</label>
-            <InputText id="firstName" @bind-Value="person.FirstName" class="form-control" />
+            <InputText id="firstName" @bind="person.FirstName" @bind:event="oninput" class="form-control" />
             <ValidationMessage For="@(() => person.FirstName)" />
         </div>
 
         <div class="form-group mb-3">
             <label for="lastName">Last Name:</label>
-            <InputText id="lastName" @bind-Value="person.LastName" class="form-control" />
+            <InputText id="lastName" @bind="person.LastName" @bind:event="oninput" class="form-control" />
             <ValidationMessage For="@(() => person.LastName)" />
         </div>
 
         <div class="form-group mb-3">
             <label for="email">Email:</label>
-            <InputText id="email" @bind-Value="person.Email" class="form-control" />
+            <InputText id="email" @bind="person.Email" @bind:event="oninput" class="form-control" />
             <ValidationMessage For="@(() => person.Email)" />
         </div>
 
         <div class="form-group mb-3">
             <label for="phoneNumber">Phone Number:</label>
-            <InputText id="phoneNumber" @bind-Value="person.PhoneNumber" class="form-control" />
+            <InputText id="phoneNumber" @bind="person.PhoneNumber" @bind:event="oninput" class="form-control" />
             <ValidationMessage For="@(() => person.PhoneNumber)" />
         </div>
 
@@ -41,17 +43,22 @@
 
 @code {
     private Person person = new();
+    private EditContext editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(person);
+        StateHasChanged();
+    }
 
     private async Task HandleValidSubmit()
     {
-        // Explicitly trigger a state change to ensure model is updated
         StateHasChanged();
+
+        Console.WriteLine($"Submitting: {person.FirstName} {person.LastName}");
 
         try
         {
-            // You can add a breakpoint here to inspect the 'person' object before posting
-            Console.WriteLine($"Submitting: {person.FirstName} {person.LastName}");
-
             var response = await Http.PostAsJsonAsync("api/person", person);
             if (response.IsSuccessStatusCode)
             {
@@ -59,10 +66,8 @@
             }
             else
             {
-                 // Handle API error responses, maybe display them to the user
                  var errorContent = await response.Content.ReadAsStringAsync();
                  Console.WriteLine($"API Error: {response.StatusCode} - {errorContent}");
-                 // You might want to parse errorContent if your API returns validation errors in a specific format
             }
         }
         catch (Exception ex)

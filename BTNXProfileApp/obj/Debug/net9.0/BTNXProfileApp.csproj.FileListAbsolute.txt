@@ -84,3 +84,4 @@
 /Users/parsaahmadi/Documents/BTNX Interview/BTNXProfileApp/obj/Debug/net9.0/BTNXProfileApp.csproj.AssemblyReference.cache
 /Users/parsaahmadi/Documents/BTNX Interview/BTNXProfileApp/obj/Debug/net9.0/BTNXProfileApp.MvcApplicationPartsAssemblyInfo.cs
 /Users/parsaahmadi/Documents/BTNX Interview/BTNXProfileApp/obj/Debug/net9.0/BTNXProf.B498D045.Up2Date
+/Users/parsaahmadi/Documents/BTNX Interview/BTNXProfileApp/obj/Debug/net9.0/BTNXProfileApp.sourcelink.json
